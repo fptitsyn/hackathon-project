@@ -19,29 +19,26 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Manager extends AppCompatActivity
         implements RoutingListener {
 
-    private List<LatLng> places;
     private List<Polyline> polylines = null;
     private final LatLng start = new LatLng(55.745832120381706, 37.64766317887026);
     private GoogleMap map;
-    private int managerCount;
+    public int managerCount;
 
-    public Manager(List<LatLng> places, GoogleMap map, int managerCount) {
-        this.places = places;
+    public Manager(GoogleMap map, int managerCount) {
         this.map = map;
         this.managerCount = managerCount;
         this.managerCount++;
     }
 
-    public List<Integer> sortDurations(List<Integer> durations) {
-        Collections.sort(durations);
-        return durations;
-    }
+//    public List<Integer> sortDurations(List<Integer> durations) {
+//        Collections.sort(durations);
+//        return durations;
+//    }
 
 //    public List<Integer> sortDurations(List<Integer> durations) {
 //        Collections.sort(durations);
@@ -54,25 +51,44 @@ public class Manager extends AppCompatActivity
 //        return ownRoute;
 //    }
 
-    public void managerFindRoutes(List<LatLng> places) {
+    public void findRoutes(List<LatLng> places) {
+//        List<LatLng> ownPlaces = new ArrayList<>();
+//        int ownPlacesSize = places.size() / managerCount;
+//        for (int i = 0; i < ownPlacesSize; i++) {
+//            ownPlaces.add(places.get(i));
+//            places.remove(i);
+//        }
+        if (places.size() > 2) {
+            Routing routing = new Routing.Builder()
+                    .travelMode(AbstractRouting.TravelMode.DRIVING)
+                    .withListener(this)
+                    .alternativeRoutes(true)
+                    .optimize(true)
+                    .waypoints(places)
+                    .key("AIzaSyAhYnFeAWHRIzhEYqWAWHUSMkVUVMv0mDM")
+                    .build();
+            routing.execute();
+        }
+        else {
+            Routing routing = new Routing.Builder()
+                    .travelMode(AbstractRouting.TravelMode.DRIVING)
+                    .withListener(this)
+                    .alternativeRoutes(true)
+                    .optimize(false)
+                    .waypoints(places.get(0), places.get(1))
+                    .key("AIzaSyAhYnFeAWHRIzhEYqWAWHUSMkVUVMv0mDM")
+                    .build();
+            routing.execute();
+        }
+    }
+
+    public void findRoutes(LatLng origin, LatLng destination) {
         Routing routing = new Routing.Builder()
                 .travelMode(AbstractRouting.TravelMode.WALKING)
                 .withListener(this)
                 .alternativeRoutes(true)
-                .optimize(true)
-                .waypoints(places)
-                .key("AIzaSyAhYnFeAWHRIzhEYqWAWHUSMkVUVMv0mDM")
-                .build();
-        routing.execute();
-    }
-
-    public void managerFindRoutes(LatLng point) {
-        Routing routing = new Routing.Builder()
-                .travelMode(AbstractRouting.TravelMode.DRIVING)
-                .withListener(this)
-                .alternativeRoutes(true)
                 .optimize(false)
-                .waypoints(start, point)
+                .waypoints(origin, destination)
                 .key("AIzaSyAhYnFeAWHRIzhEYqWAWHUSMkVUVMv0mDM")
                 .build();
         routing.execute();
@@ -95,7 +111,7 @@ public class Manager extends AppCompatActivity
     public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
         CameraUpdate center = CameraUpdateFactory.newLatLng(start);
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
-        if (polylines != null) {
+        if(polylines!=null) {
             polylines.clear();
         }
         PolylineOptions polyOptions = new PolylineOptions();
@@ -106,8 +122,8 @@ public class Manager extends AppCompatActivity
         //add route(s) to the map using polyline
         for (int i = 0; i < route.size(); i++) {
             if (i == shortestRouteIndex) {
-                polyOptions.color(Color.parseColor("red"));
-                polyOptions.width(8);
+                polyOptions.color(Color.RED);
+                polyOptions.width(7);
                 polyOptions.addAll(route.get(shortestRouteIndex).getPoints());
                 Polyline polyline = map.addPolyline(polyOptions);
                 polylineStartLatLng = polyline.getPoints().get(0);

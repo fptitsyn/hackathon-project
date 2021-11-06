@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MeetingActivity">
+
+
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/fab"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="bottom|end"-->
+<!--        android:layout_marginEnd="@dimen/fab_margin"-->
+<!--        android:layout_marginBottom="16dp"-->
+<!--        android:background="@drawable/ellipse_3"-->
+<!--        android:src="@mipmap/plus_circle" />-->
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="270dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="200dp"
+        android:layout_marginStart="75dp"
+        app:srcCompat="@mipmap/unknown" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="110dp"
+        android:layout_marginTop="180dp"
+        android:text="Запланированные встречи" />
+
+    <TextView
+        android:id="@+id/some_id"
+        android:layout_width="114dp"
+        android:layout_height="56dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="59dp"
+        android:layout_marginTop="210dp"
+        android:gravity="top"
+        android:text="Мамыкин Максим Романович" />
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="70dp"
+        android:layout_height="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="174dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="220dp"
+        android:text="9:00"
+        android:gravity="top"
+        />
+
+    <TextView
+        android:id="@+id/address"
+        android:layout_width="110dp"
+        android:layout_height="75dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="245dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="210dp"
+        android:text="г.Москва ул. Золоторожский Вал 11, кв 16"
+        android:gravity="top"
+        />
+
+    <View
+        android:id="@+id/rectangle_1"
+        android:layout_width="303dp"
+        android:layout_height="88dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="200dp"
+        android:background="@drawable/alpha_rectangle_1"
+        android:elevation="4dp"
+        />
+
+    <TextView
+        android:id="@+id/name_id"
+        android:layout_width="114dp"
+        android:layout_height="56dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="59dp"
+        android:layout_marginTop="350dp"
+        android:gravity="top"
+        android:text="Птицын Фёдор Андреевич" />
+
+    <TextView
+        android:id="@+id/time_id"
+        android:layout_width="70dp"
+        android:layout_height="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="174dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="360dp"
+        android:text="11:00"
+        android:gravity="top"
+        />
+
+    <TextView
+        android:id="@+id/address_id"
+        android:layout_width="110dp"
+        android:layout_height="75dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="245dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="350dp"
+        android:text="г. Москва ул. Новый арбат 21, кв 73"
+        android:gravity="top"
+        />
+
+    <View
+        android:id="@+id/rectangle_2"
+        android:layout_width="303dp"
+        android:layout_height="88dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="340dp"
+        android:background="@drawable/alpha_rectangle_1"
+        android:elevation="4dp"
+        />
+
+    <Button
+        android:id="@+id/button_stats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="220dp"
+        android:layout_marginTop="40dp"
+        android:text="Статистика" />
+
+    <ImageView
+        android:id="@+id/ellipse_2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/ellipse_2"
+        app:srcCompat="@mipmap/robert"
+        android:elevation="4dp"
+        />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="500dp"
+        android:text="Добавить встречу"
+        app:layout_anchor="@+id/imageView2"
+        app:layout_anchorGravity="bottom|center" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="43dp"
+        android:layout_marginTop="115dp"
+        android:text="Роберт Попов" />
+
+    <Button
+        android:id="@+id/button_route"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="210dp"
+        android:layout_marginTop="80dp"
+        android:text="Весь маршрут" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

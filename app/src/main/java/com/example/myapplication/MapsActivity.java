@@ -1,18 +1,19 @@
 package com.example.myapplication;
 
 
-import static com.example.myapplication.GFG.valueSort;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.os.StrictMode;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -31,18 +32,29 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.example.myapplication.databinding.ActivityMapsBinding;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.collect.Maps;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 public class MapsActivity extends AppCompatActivity
         implements
@@ -65,10 +77,7 @@ public class MapsActivity extends AppCompatActivity
 
     private ClusterManager<ClusterMarker> clusterManager;
 
-    private List<Integer> durations = new ArrayList<>();
-    private Map<LatLng, Integer> placesWithValues = new HashMap<>();
 
-    public static final String LOG_TAG = "DURATIONS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,10 +92,23 @@ public class MapsActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
         places.add(start);
-        places.add(new LatLng(55.760133, 37.618697));
-        places.add(new LatLng(55.7546815777868, 37.62291266227732));
-        places.add(new LatLng(55.764817, 37.591245));
-        places.add(new LatLng(55.664817, 37.491245));
+        Intent intent = getIntent();
+        LatLng address = intent.getParcelableExtra("ADDRESS");
+        places.add(address);
+
+        Intent intent2 = getIntent();
+        if (intent2.getIntExtra("ROUTE", 0) == 1) {
+            places.add(new LatLng(55.753884949680305, 37.691154336772904));
+            places.add(new LatLng(55.75208968204676, 37.58545511591237));
+        }
+// 55.75208968204676, 37.58545511591237
+//        places.add(new LatLng(55.753884949680305, 37.691154336772904));
+//        places.add(new LatLng(55.764817, 37.591245));
+//        places.add(new LatLng(55.664817, 37.491245));
+
+//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+//                .permitAll().build();
+//        StrictMode.setThreadPolicy(policy);
 
         searchView = findViewById(R.id.idSearchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -115,9 +137,6 @@ public class MapsActivity extends AppCompatActivity
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
 
                         findRoutes(latLng);
-                        for (int duration: durations) {
-                            Log.d(LOG_TAG, "" + duration);
-                        }
                     }
                     catch (IndexOutOfBoundsException e) {
                         Toast.makeText(MapsActivity.this,"Address not found",Toast.LENGTH_LONG).show();
@@ -144,36 +163,16 @@ public class MapsActivity extends AppCompatActivity
         settings.setMyLocationButtonEnabled(true);
         settings.setCompassEnabled(true);
         settings.setZoomControlsEnabled(true);
-        settings.setMapToolbarEnabled(true);
-        map.setPadding(0, 180,0,0);
+        map.setPadding(0, 180, 0, 0);
 
-        findRoutes(places);
-        for (int duration: durations) {
-            Log.d(LOG_TAG, "" + duration);
-        }
         setUpClusterer();
 
-        startManagers();
+        Manager manager1 = new Manager(map, 0);
+        startManager(manager1);
     }
 
-    public void startManagers() {
-        if (!durations.isEmpty()) {
-            Manager manager = new Manager(places, map, 0);
-            Collections.sort(durations);
-            fillAndSortDictionary(manager.sortDurations(durations));
-            List<LatLng> sortedPlaces = new ArrayList<>(placesWithValues.keySet());
-            manager.managerFindRoutes(sortedPlaces);
-            for (int duration: durations) {
-                Log.d(LOG_TAG, "" + duration);
-            }
-        }
-    }
-
-    public void fillAndSortDictionary(List<Integer> sortedDurations) {
-        for (int i = 0; i < places.size() && i < sortedDurations.size(); i++) {
-            placesWithValues.put(places.get(i), sortedDurations.get(i));
-        }
-        valueSort(placesWithValues);
+    private void startManager(Manager manager) {
+        manager.findRoutes(places);
     }
 
     private void enableMyLocation() {
@@ -206,7 +205,7 @@ public class MapsActivity extends AppCompatActivity
         clusterManager = new ClusterManager<>(this, map);
         DefaultClusterRenderer<ClusterMarker> clusterRenderer =
                 new DefaultClusterRenderer<>(this, map, clusterManager);
-        clusterRenderer.setMinClusterSize(2);
+        clusterRenderer.setMinClusterSize(3);
         clusterManager.setRenderer(clusterRenderer);
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
@@ -263,29 +262,22 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
-        if (durations.isEmpty()) {
-            for (int i = 0; i < route.size(); i++)
-                durations.add(route.get(i).getDurationValue());
+        CameraUpdateFactory.newLatLng(start);
+        CameraUpdateFactory.zoomTo(16);
+        if (polylines != null) {
+            polylines.clear();
         }
-        else {
-            CameraUpdateFactory.newLatLng(start);
-            CameraUpdateFactory.zoomTo(16);
-            if (polylines != null) {
-                polylines.clear();
-            }
-            PolylineOptions polyOptions = new PolylineOptions();
-            polylines = new ArrayList<>();
-            //add route(s) to the map using polyline
-            for (int i = 0; i < route.size(); i++) {
-                if (i == shortestRouteIndex) {
-                    durations.add(route.get(i).getDurationValue());
-                    polyOptions.color(getResources().getColor(R.color.colorPrimary));
-                    polyOptions.width(8);
-                    polyOptions.addAll(route.get(shortestRouteIndex).getPoints());
-                    Polyline polyline = map.addPolyline(polyOptions);
-                    int k = polyline.getPoints().size();
-                    polylines.add(polyline);
-                }
+        PolylineOptions polyOptions = new PolylineOptions();
+        polylines = new ArrayList<>();
+        //add route(s) to the map using polyline
+        for (int i = 0; i < route.size(); i++) {
+            if (i == shortestRouteIndex) {
+                polyOptions.color(getResources().getColor(R.color.colorPrimary, null));
+                polyOptions.width(8);
+                polyOptions.addAll(route.get(shortestRouteIndex).getPoints());
+                Polyline polyline = map.addPolyline(polyOptions);
+                int k = polyline.getPoints().size();
+                polylines.add(polyline);
             }
         }
     }
@@ -298,5 +290,22 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
 
+    }
+
+    public int getWidth() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        return width;
+    }
+
+    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Map.Entry<T, E> entry : map.entrySet()) {
+            if (Objects.equals(value, entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }

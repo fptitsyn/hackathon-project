@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class GFG {
+public class ValueComparator {
     public static <K, V extends Comparable<V> > Map<K, V>
     valueSort(final Map<K, V> map)
     {
